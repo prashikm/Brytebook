@@ -1,0 +1,26 @@
+{% extends 'layouts/home_layout.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Donate | Brytebook</title>
+    <link rel="stylesheet" href="{% static 'styles/tailwind-typography.css' %}">
+{% endblock head %}
+
+{% block body %}
+    <div class="max-w-2xl mx-auto px-6 md:px-0 my-10 prose md:prose-xl">
+        <p>Hi there,</p>
+        <p>Brytebook is ad-free, and we hope to keep it that way. If you'd like to help, we would greatly appreciate your support.</p>
+        <p>Collectively, our team has dedicated more than two years to building Brytebook. We've bootstrapped the company using our savings, and we operate highly efficiently on a shoestring budget.</p>
+        <p>Donations enable us to maintain our independence, free from the influence of advertisers. You can make a donation via the button below, and if you're interested in investing in Brytebook please send an email to <a href="mailto:brytebookhq@gmail.com">brytebookhq@gmail.com</a>.</p>
+        <p>To our generous supporters and patrons: thank you!</p>
+        <p>Samyak and Prashik</p>
+        <p>
+            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="brytebook" data-color="#FFDD00" data-emoji="❤️"  data-font="Arial" data-text="Donate" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff"></script>
+        </p>
+    </div>
+    <style>
+        .bmc-btn {
+            min-width: 0;
+        }
+    </style>
+{% endblock body %}

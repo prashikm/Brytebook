@@ -1,0 +1,33 @@
+{% extends 'layouts/dashboardLayout.html' %}
+
+{% block title %}
+    Analytics
+{% endblock %}
+
+{% block analytics_active %}text-black{% endblock analytics_active %}
+
+{% block body %}
+    <section class="mt-8">
+        <div class="max-w-2xl mx-auto p-4">
+
+            <h2 class="text-3xl font-semibold mb-6">Most Viewed Posts</h2>
+            <div>
+
+                {% for post in posts %}
+                    <div class="flex justify-between mx-6 mb-8 md:mx-0">
+                        <div class="w-96">
+                            <p class="font-semibold">{{ post.title }}</p>
+                            <p class="text-gray-400">{{ post.date }}</p>
+                        </div>
+                        <div class="flex mt-2">
+                            <img alt="views" class="w-6 h-6 mr-3"
+                                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAACe0lEQVRoge2aIXPkMAyFP2oaGhq6NHTh0qWhS0OXLg29v3zA8fSutRI/18m2M3ozIp1W0rNkSVYKDofD4XA4HA6H4ycjAANwAUbgusq4/mwAurd51wCBSOgJLMAfQR7r34bTvRYRiNGqIblFfjyTRAkCcKcdSUvuZxHawkCM6JFE/5UXb4p4ACbB0YV4ME9imt5XmYCZSEQhPnHiHe8LHFxWIrf190udG4gFa97Rn2z0LQhtYY/sQiTZqsVcN2wdTnrALkytiX7GzbCbZGhtsGeb7KW1QcMHK7uaRjpgV+IZLaphdSxNXKqTAft+v0RdJh6GgZnyYrTXq2+iTxbpWdTzBVbReFJOtsM+tM86lWyxSFf36UA+Ii+0yJa0mJq0DOTv9EJl8cxVRrVA7bWV76Z3b+iYBB1APKFcdNV5Vp2gkiiwWpYUZSu6yjhnnX6JKNXbSm0pyjkFaiUdMzpK5drA1qIoyKWzWv0uGR2lotqyCBdnZO4lJJ3YaqyWsFIYrcHo0cJZtWjVLgWUWmEVLXnUtN67iqK7oWNLlEO1ZnwpugnW4KFWa2UjokxwVipXDx5gV1plZu0Mx3JkSx0N2OOq2k2+oNWgbt21hZjGSmSt66Y8aDYNWBNTzevkwsciXln/JF8sssqMv4vOMJIidPhuif0FQPOtx2AYq21Zpdh7Sy8cuLrdWvW0Jh6I937L3inrpRLSqRde0VpEz8eads/GWbs0oG4RPxMPYSJGLi3jZ2JLUp6S6i6tGUbR0e/Kgv6SOgQ1I6RK9NTPK6Uo/UyipK5aB96Cjjry6aNb+ib1a9Hx/7873FZJE9eAPnU5HA6Hw+FwOByOE/EXyrKd2XAY66EAAAAASUVORK5CYII="/>
+                            <p class="text-gray-400">20K</p>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

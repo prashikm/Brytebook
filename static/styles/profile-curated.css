@@ -1,0 +1,17 @@
+.followBtn {
+    margin-left: 2rem !important;
+}
+.load-spin{
+    display:none;
+}
+.htmx-request .load-spin{
+    display:flex;
+}
+.htmx-request.load-spin{
+    display:flex;
+}
+
+.draft-post.htmx-swapping {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}

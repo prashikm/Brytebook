@@ -1,0 +1,85 @@
+{% extends 'layouts/home_layout.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Explore | Brytebook</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <meta name="title" content="Explore | Brytebook">
+    <meta name="description" content="Simple, meaningful way to fund your creative work. Use memberships and subscriptions to develop a direct relationship with your audience and generate predictable, recurring revenue to support your work.">
+    <link rel="canonical" href="https://brytebook.com/home">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://brytebook.com">
+    <meta property="og:title" content="Explore | Brytebook">
+    <meta property="og:description" content="Simple, meaningful way to fund your creative work. Use memberships and subscriptions to develop a direct relationship with your audience and generate predictable, recurring revenue to support your work.">
+    <meta property="og:image" content="{% static 'images/landing_page.png' %}">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://brytebook.com/home">
+    <meta property="twitter:title" content="Explore | Brytebook">
+    <meta property="twitter:description" content="Simple, meaningful way to fund your creative work. Use memberships and subscriptions to develop a direct relationship with your audience and generate predictable, recurring revenue to support your work.">
+    <meta property="twitter:image" content="{% static 'images/landing_page.png' %}">
+{% endblock head %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 justify-evenly my-8">
+    {% for post in posts %}
+    <section class="mb-12 lg:mx-6">
+        <div class="max-w-md mx-auto mt-4">
+            <div class="mb-3">
+                <a href="{% url 'article' post.user.username post.id post.slug %}">
+                    <img class="lazy object-cover h-72 w-full rounded-none md:rounded-md" 
+                        src="{{ post.cover }}" 
+                        alt="cover image" 
+                    />
+                </a>
+            </div>
+            <div class="px-4 md:px-1">
+                <h2 class="text-xl md:text-2xl font-semibold">
+                    <a href="{% url 'article' post.user.username post.id post.slug %}">{{ post.title }}</a>
+                </h2>
+                <div class="text-gray-800 py-4">
+                    <a href="{% url 'article' post.user.username post.id post.slug %}">
+                        {{ post.desc | truncatechars:150 | safe }}
+                    </a>
+                </div>
+
+                <div class="flex justify-between place-items-center">
+                    <div class="flex w-50 place-items-center">
+                        <div>
+                            <img class="rounded-full h-12 w-12 md:h-14 md:w-14"
+                                src="https://img-static-s3.s3.amazonaws.com/media/{{ post.user.customuser.pic }}" 
+                                alt="{{ post.user.username }}"
+                                alt="{{ post.user.username }}"     
+                            />
+                        </div>
+                        <div class="ml-4">
+                            <h6 class="font-semibold -mb-1 md:mb-0 text-gray-800 hover:text-blue-700">
+                                <a href="{% url 'profile' post.user.username %} ">
+                                    {{ post.user.first_name }}
+                                </a>
+                            </h6>
+                            <p class="text-gray-700 text-sm">{{ post.date }}</p>
+                        </div>
+                    </div>
+                    {% load check_bookmark %}
+                    <div>
+                        <a href="/login">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24"
+                                style="fill:rgba(0, 0, 0, 1);">
+                                <path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endfor %}
+</div>
+
+<div class="my-10 text-center text-xl">
+    <a href="/login" class="font-semibold text-blue-500 hover:text-blue-700 hover:underline">Sign in</a> or <a href="/signup" class="font-semibold text-blue-500 hover:text-blue-700 hover:underline">Join</a> to view all posts
+</div>
+{% endblock body %}

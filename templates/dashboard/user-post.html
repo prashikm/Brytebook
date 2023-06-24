@@ -1,0 +1,150 @@
+{% extends 'layouts/dashboardLayout.html' %}
+
+{% load static %}
+
+{% block title %}
+    Posts
+{% endblock %}
+
+{% block posts_active %}text-black{% endblock posts_active %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+{% endblock head %}
+
+{% block script %}
+    <script src="{% static 'js/iziToast.js' %}"></script>
+    <script>
+        $(".deletePost").submit(function (event) {
+
+            console.log(this.action)
+
+            function ajaxDelete() {
+                var formData = {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: this.action,
+                    data: formData,
+                    dataType: 'json',
+                    encode: true,
+                }).done(function (data) {
+                    if (!data.success) {
+                        if (data.username_error) {
+                            iziToast.error({
+                                position: 'topRight',
+                                title: 'Error',
+                                message: data.username_error
+                            })
+                        }
+                    } else {
+                        window.location.href = '/account/i/post'
+                    }
+                });
+            }
+
+            iziToast.question({
+                timeout: 20000,
+                close: false,
+                overlay:true,
+                id: 'question',
+                zindex: 999,
+                title: 'Delete Post',
+                message: 'Are you sure about deleting this post?',
+                position: 'center',
+                buttons: [
+                    ['<button><b>YES</b></button>', function (instance, toast) {
+                        console.log('Working')
+                        console.log(instance, toast)
+                        ajaxDelete();
+            
+                    }, true],
+                    ['<button>NO</button>', function (instance, toast) {
+            
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+            
+                    }],
+                ],
+            })
+
+            event.preventDefault();
+        })
+    </script>
+{% endblock script %}
+
+{% block body %}
+    <section class="mt-10 mb-20 sm:ml-10 px-4 sm:px-0 flex flex-col place-items-center">
+        <div class="text-left">
+            <h2 class="text-3xl font-semibold">Your Posts</h2>
+        </div>
+        
+        <section>
+            <div class="max-w-4xl my-4">
+                <div class="flex">
+                    <div class="border-b hover:border-gray-700 mr-6">
+                        <p class="font-semibold text-md pb-4 text-gray-600 hover:text-black">
+                            <a href="{% url 'draft_post' %}">Draft</a></p>
+                    </div>
+
+                    <div class="border-b text-black hover:border-gray-700">
+                        <p class="font-semibold text-md pb-4 text-gray-600 hover:text-black">
+                            <a href="{% url 'published_post' %}">Published</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {% for post in posts %}
+
+            <div class="max-w-4xl mx-auto mb-8">
+                <div>
+                    <div class="w-full max-w-lg overflow-hidden rounded-lg shadow-lg sm:flex">
+                        <div class="w-full sm:w-1/3">
+                            <img class="object-cover w-full h-48" src="https://img-static-s3.s3.amazonaws.com/media/{{ post.cover }}" alt="Flower and sky"/>
+                        </div>
+                        <div class="flex-1 px-6 py-4">
+                            <h4 class="mb-2 text-xl font-semibold tracking-tight text-gray-800">
+                                <a href="{% url 'get_edit_post' post.id post.slug %}"> {{ post.title | truncatechars:40 }} </a>
+                            </h4>
+                            <div class="leading-normal text-gray-700">
+                                <p>{{ post.desc | truncatechars:80 | safe }}</p>
+                            </div>
+                            <div class="mt-2 flex place-content-between place-items-center">
+                                <div>
+                                    {% if post.published %}
+                                        <p class="text-xs text-gray-600">Published on</p>
+                                        <p class="text-gray-500 text-sm">{{ post.date }}</p>
+                                    {% else %}
+                                        <p class="text-gray-500 text-sm">Draft</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <form action="{% url 'delete_post' post.id %}" method="post" class="deletePost">
+                                        <!--action="{% url 'delete_post' post.id %}"-->
+                                        {% csrf_token %}
+                                        <button type="submit">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 class="icon icon-tabler icon-tabler-trash" width="24" height="24"
+                                                 viewBox="0 0 24 24" stroke-width="1.5" stroke="#ca2825" fill="none"
+                                                 stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                <line x1="4" y1="7" x2="20" y2="7"/>
+                                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                                <line x1="14" y1="11" x2="14" y2="17"/>
+                                                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/>
+                                                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endfor %}
+    </section>
+{% endblock body %}

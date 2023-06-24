@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invite Only User</title>
+    <style>
+        body {
+            margin: 2rem;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        form {
+            margin-bottom: 2rem;
+        }
+
+        input[type='email'] {
+            padding: 0.4rem;
+            width: 14rem;
+        }
+
+        button{
+            padding: 0.6rem;
+        }
+    </style>
+</head>
+<body>
+    <form action="/get/invite/user" method="post">
+        {% csrf_token %}
+        <input type="email" name="email" id="email" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Invitation Code</th>
+            <th>Applied</th>
+        </tr>
+        {% for invite in invites %}
+        <tr>
+            <td>{{ invite.email }}</td>
+            <td>{{ invite.invitation_code }}</td>
+            <td>{{ invite.code_applied }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,114 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+    {% include 'components/get_tailwind.html' %}
+    {% block head %}{% endblock head %}
+</head>
+<body>
+    <div>
+        {% include 'components/navbar.html' %}
+
+        {% block body %}{% endblock body %}
+
+        <footer class="py-10 md:py-16 border-t border-gray-200">
+            <div class="mx-3 md:px-6 mb-14 md:max-w-5xl md:mx-auto md:flex place-content-between">
+                <div class="mb-6">
+                    <div class="mb-3">
+                        <img class="pb-3 w-24" src="{% static 'images/wordmark.png' %}" alt="Brytebook" />
+                        
+                        <p class="py-6">Subscribe to our newsletter</p>
+                        <div id="revue-embed">
+                            <form action="https://www.getrevue.co/profile/brytebook/add_subscriber" method="post" id="revue-form" name="revue-form"  target="_blank">
+                                <div class="revue-form-group">
+                                    <label for="member_email" class="hidden">Email address</label>
+                                    <input class="revue-form-field py-2 w-full border border-gray-300 rounded-md px-2 outline-none transition-colors duration-700 ease-in-out focus:border-gray-400 md:py-3 md:px-2" placeholder="Your email address..." type="email" name="member[email]" id="member_email">
+                                </div>
+                                <div class="revue-form-actions">
+                                    <input type="submit" value="Subscribe" name="member[subscribe]" id="member_submit" class="cursor-pointer w-full px-8 py-2 md:px-10 md:py-2.5 my-2 text-white font-semibold bg-gray-800 rounded-lg duration-700 ease-in-out focus:shadow-outline hover:bg-gray-900">
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="flex flex-col mt-10 md:mt-0 md:flex-row md:space-x-20">
+                    <div class="mb-6">
+                        <h4 class="font-bold text-gray-800 mb-2">About</h4>
+                        <ul class="flex space-x-5 md:flex-col md:space-x-0 md:space-y-2 text-gray-700">
+                        <li>
+                            <a href="{% url 'terms' %}" class="hover:text-blue-700 hover:underline">Terms</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'privacy_policy' %}" class="hover:text-blue-700 hover:underline">Privacy</a>
+                        </li>
+                        </ul>
+                    </div>
+                
+                    <div class="mb-6">
+                        <h4 class="font-bold text-gray-800 mb-2">Connect</h4>
+                        <ul class="flex space-x-5 md:flex-col md:space-x-0 md:space-y-2 text-gray-700">
+                        <li>
+                            <a href="mailto:brytebookhq@gmail.com" class="hover:text-blue-700 hover:underline">Contact</a>
+                        </li>
+                        <li>
+                            <a href="mailto:brytebookhq@gmail.com" class="hover:text-blue-700 hover:underline">Feedback</a>
+                        </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="flex space-x-5 md:flex-col md:space-x-0 md:space-y-2 text-gray-700">
+                            <li>
+                                <a href="https://brytebook.featurebase.app/" rel="nofollow noopener noreferrer" target="_blank" class="hover:text-blue-700 hover:underline">Roadmap</a>
+                            </li>
+                            <li>
+                                <a href="/donate" class="hover:text-blue-700 hover:underline">Donate</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-2">
+                <div class="px-4 max-w-5xl mx-auto flex items-center place-content-between">
+                    <div>
+                    <p class="text-sm text-gray-800">&copy; {% now "Y" %} Brytebook</p>
+                    </div>
+                    <div class="pr-4 flex">
+                    <p class="py-2 mr-4">
+                        <a href="https://twitter.com/brytebook" rel="nofollow noopener noreferrer" target="_blank">
+                            <img class="w-6" src="https://img.icons8.com/ios-glyphs/30/000000/twitter--v1.png" alt="Twitter" />
+                        </a>
+                    </p>
+                    <p class="py-2 mr-4">
+                        <a href="https://www.linkedin.com/company/brytebook" rel="nofollow noopener noreferrer" target="_blank">
+                            <img class="w-6" src="https://img.icons8.com/ios-glyphs/30/000000/linkedin.png" alt="Linked In" />
+                        </a>
+                    </p>
+                    <p class="py-2 mr-4">
+                        <a href="https://www.instagram.com/brytebook/" rel="nofollow noopener noreferrer" target="_blank">
+                            <img class="w-6" src="https://img.icons8.com/ios-glyphs/30/000000/instagram-new.png" alt="Instagram" />
+                        </a>
+                    </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <style>
+        @media (min-width: 768px) {
+            .revue-form-field {
+              width: 22rem;
+            }
+          }
+    </style>
+
+    {% include 'components/analytics.html' %}
+    {% block javascript %}{% endblock javascript %}
+</body>
+</html>

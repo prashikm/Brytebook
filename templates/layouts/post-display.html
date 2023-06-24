@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+    {% include 'components/get_tailwind.html' %}
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+    {% block head %}{% endblock head %}
+</head>
+<body>
+    {% include 'components/logged-navbar.html' %}
+    {% block post_header %}{% endblock post_header %}
+
+    <div class="infinite-container max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 justify-evenly mt-8">
+        {% if user.is_authenticated %}
+            {% block body %}{% endblock body %}
+        {% endif %}
+    </div>
+    
+    <div class="loading flex place-content-center mt-2" style="display: none;">
+        <div class="flex bg-blue-500 p-2 rounded-md text-white">
+            <div>
+                <svg class="animate-spin mr-4" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="24" 
+                    height="24"
+                    viewBox="0 0 24 24" 
+                    style="fill: rgba(255, 255, 255, 1);"
+                >
+                    <circle cx="12" cy="20" r="2"></circle>
+                    <circle cx="12" cy="4" r="2"></circle>
+                    <circle cx="6.343" cy="17.657" r="2"></circle>
+                    <circle cx="17.657" cy="6.343" r="2"></circle>
+                    <circle cx="4" cy="12" r="2.001"></circle>
+                    <circle cx="20" cy="12" r="2"></circle>
+                    <circle cx="6.343" cy="6.344" r="2"></circle>
+                    <circle cx="17.657" cy="17.658" r="2"></circle>
+                </svg>
+            </div>
+            <div class="mr-2">Loading...</div>
+        </div>
+    </div>
+
+    {% if posts.has_next %}
+        <a class="infinite-more-link" href="?page={{ posts.next_page_number }}">More</a>
+    {% endif %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+    <script src="{% static 'js/infinite.min.js' %}"></script>
+    <script src="{% static 'js/dropdown.js' %}"></script>
+    <script src="{% static 'js/init-waypoint.js' %}"></script>
+    <script src="{% static 'js/iziToast.js' %}"></script>
+    {% if user.is_authenticated %}
+        <script>
+            $(".bookmark_this").click(function (e) {
+                e.preventDefault();
+                var getTag = $(this).children('svg')
+
+                $.ajax({
+                    type: "POST",
+                    url: this.href,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    dataType: "json"
+                }).done(function (data) {
+                    if (data.added) {
+                        addBookmark()
+                    } else {
+                        removeBookmark()
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+
+                function addBookmark() {
+                    getTag.html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);"><path d="M19,10.132v-1v-5c0-1.103-0.897-2-2-2H7c-1.103,0-2,0.897-2,2v5v1V22l7-4.666L19,22V10.132z"></path></svg>')
+                }
+
+                function removeBookmark() {
+                    getTag.html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);"><path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path></svg>')
+                }
+            });
+        </script>
+    {% else %}
+        <script>
+            $(".bookmark_this").click(function (e) {
+                e.preventDefault();
+
+                iziToast.info({
+                    position: 'topRight',
+                    message: 'Please login or create an account to bookmark post.'
+                })
+            });
+        </script>
+    {% endif %}
+{% block javascript %}{% endblock javascript %}
+</body>
+</html>

@@ -1,0 +1,336 @@
+{% extends 'layouts/loggedInLayout.html' %}
+{% load static %}
+
+{% block head %}
+    <title>{{ profile.user.first_name }} | Brytebook</title>
+    <meta name="title" content="{{ profile.user.first_name }} - Brytebook">
+    <meta name="description" content="{{ profile.bio }}">
+    <link rel="canonical" href="https://brytebook.com/{{ profile.user.username }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://brytebook.com/{{ profile.user.username }}">
+    <meta property="og:title" content="{{ profile.user.first_name }} - Brytebook">
+    <meta property="og:description" content="{{ profile.bio }}">
+    <meta property="og:image" content="https://img-static-s3.s3.amazonaws.com/media/{{ profile.user.customuser.pic }}">
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://brytebook.com/{{ profile.user.username }}">
+    <meta property="twitter:title" content="{{ profile.user.first_name }} - Brytebook">
+    <meta property="twitter:description" content="{{ profile.bio }}">
+
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/profile-curated.css' %}">
+{% endblock head %}
+
+{% block body %}
+<section class="p-4 max-w-3xl mx-auto flex justify-center mt-10">
+  <div class="sm:flex sm:space-x-6">
+    <div class="flex items-center sm:items-stretch">
+      <div class="mr-2">
+        <img class="rounded-full border border-gray-500 p-1 w-28 h-28 sm:w-40 sm:h-40" src="https://img-static-s3.s3.amazonaws.com/media/{{ profile.user.customuser.pic }}" alt="profile-pic" />
+      </div>
+      <div class="sm:hidden">
+        <h2 class="text-lg font-semibold">{{ profile.user.first_name|truncatechars:20 }}</h2>
+        <h4 class="text-gray-500">@{{ profile.user.username }}</h4>
+      </div>
+    </div>
+    <div class="max-w-md">
+      <div class="hidden sm:flex">
+        <div>
+          <h2 class="text-2xl font-semibold">{{ profile.user.first_name }}</h2>
+          <h4 class="text-gray-500">@{{ profile.user.username }}</h4>
+        </div>
+
+    {% if user.get_username == profile.user.username %}
+        <div class="followBtn mt-2 hidden sm:inline-block">
+            <a href="{% url 'settings' %}">
+                <button class="h-8 px-5 transition-colors duration-150 border border-black rounded-md focus:shadow-outline">
+                    Edit profile
+                </button>
+            </a>    
+        </div>
+      </div>
+
+        <div class="mt-4 sm:hidden">
+            <a href="{% url 'profile_edit' %}">
+                <button class="w-full h-8 px-5 transition-colors duration-150 border border-black rounded-md focus:shadow-outline">
+                    Edit profile
+                </button>
+            </a>    
+        </div>
+    {% else %}
+        <div class="followBtn mt-2 hidden sm:inline-block">
+            <a href="/account/follow/{{ profile.user }}" class="follow">
+                <button class="h-8 px-5 text-white transition-colors duration-150 bg-blue-500 rounded-md focus:shadow-outline hover:bg-blue-700" id='follow-btn'>
+                        {% if is_following %}
+                            Following
+                        {% else %}
+                            Follow
+                        {% endif %}
+                </button>
+            </a>
+        </div>
+
+      </div>
+
+      <div class="mt-4 sm:hidden">
+            <a href="/account/follow/{{ profile.user }}" class="follow">
+                <button class="w-full h-8 px-5 text-white transition-colors duration-150 bg-blue-500 rounded-md focus:shadow-outline hover:bg-blue-700" id='follow-btn'>
+                        {% if is_following %}
+                            Following
+                        {% else %}
+                            Follow
+                        {% endif %}
+                </button>
+            </a>
+      </div>
+    {% endif %}
+
+      <div class="py-4">
+        <ul class="flex">
+          <li class="mr-6">
+            <a href="{% url 'followers_list' profile.user %}"><span class="font-semibold" id="followers">{{ follower }}</span> followers</a>
+          </li>
+          <li>
+            <a href="{% url 'following_list' profile.user %}"><span class="font-semibold">{{ following }}</span> following</a>
+          </li>
+        </ul>
+      </div>      
+      <div>
+        <p>{{ profile.bio }}</p>
+      </div>
+      {% if profile.link != '' %}
+        <div class="flex items-center py-4">
+            <div class="mr-2">
+            <img alt="web-link" class="h-6 w-6" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAACTElEQVRoge2aLZODMBCGHxuLxWKxtZW1tWdra7FY7P3lE2mGDrf5BEJg8sxk7kQp+7K72c1SqFQqlUqlUplRQAv0QAc0x5qzDwp4AAMwAb/CegG3owzcCgU8sYuU1sBJhTfAm3Chy/XMb3I6LXFedXm7eELETmjvD57Pmdwumg678T/oB6IW1/S4xfc5DF/DUvRAmNF37BFRPEb0QFytvSGLPsXOndpYSOFdfC6voUH28jL3L4W007eHWrQzUlh3RxmjPjd/MNfTCRjRufbcwLgXhZSnjrCGYW1fPArfl9XDCvmphwqP2XBsm1a2o2SL/MRj1kj4pvMQrs/WV291EDAdk0+07X5ZTk8+sW+0NzrmKcYDdzSM2MNbIR8pQx7UalxiJ3Tf60Lqi12Gu/aI3b3rEhvTGyvmHT1VrCsiNmErsQYTpilidw/lhjSxZpwT6wmf2F0bDduGESLWbFKj43PS/Q4TC3LtixH7vXzdVWe5LptYhRzKPo+5WsyBuWQ1n7933N1aFrFgH634br51U5LtcCDlbmjt26LtzCpWWYyIKT+uDc+3UkrdKlrBiNQp4Y1wb5tuLfvYRpojrz2Z9OiUeKMfwPRZA3o23XHgfEoSfIo5cCq2HL4sNsGXnhD+8F/wO+F7zHCveGyvN3xn3m++e+NTvBaxlZMQ0dIks3jRPe7mQMpp308aihct5fJyvZjrazHt4hpCh+yXEGt4ki7WFv7FcyfuFDShU+L0rzTvuE9CAzoiTulVH2bY3n/+v+TPBiuVSqVSqaTxB8G0TcvZM5EAAAAAAElFTkSuQmCC" />
+            </div>
+            <div>
+            <a class="text-blue-800" href="{{ profile.link }}" page_id="profilePage" rel="me nofollow noopener noreferrer" target="_blank">{{ profile.link|slice:"8:" }}</a>
+            </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="md:px-6 mt-6">
+    <div class="max-w-5xl mx-auto border-b border-gray-300">
+        <div class="max-w-md mx-auto flex place-content-center">
+            <div class="profile_links mr-16">
+                <a 
+                    hx-post="{% url 'get_user_post' profile.user.username 'posts' %}" 
+                    hx-trigger="click" 
+                    hx-target="#post-content" 
+                    hx-push-url="/{{ profile.user.username }}" 
+                    hx-indicator="#spinner"
+                >
+                    <p id="posts-btn" class="cursor-pointer font-semibold text-xl pb-2 text-black">
+                        Posts
+                    </p>
+                </a>
+            </div>
+
+            <div class="profile_links">
+                <a 
+                    hx-post="{% url 'get_user_post' profile.user.username 'curated' %}" 
+                    hx-trigger="click" 
+                    hx-target="#post-content" 
+                    hx-push-url="/{{ profile.user.username }}/curated" 
+                    hx-indicator="#spinner"
+                >
+                    <p id="curated-btn" class="cursor-pointer font-semibold text-xl pb-2 text-gray-500 hover:text-black">
+                        Curated
+                    </p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+    <div id="spinner" class="load-spin flex justify-center items-center mt-6">
+        <div>
+            <svg class="animate-spin mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" style="fill: #564232;">
+                <circle cx="12" cy="20" r="2"></circle>
+                <circle cx="12" cy="4" r="2"></circle>
+                <circle cx="6.343" cy="17.657" r="2"></circle>
+                <circle cx="17.657" cy="6.343" r="2"></circle>
+                <circle cx="4" cy="12" r="2.001"></circle>
+                <circle cx="20" cy="12" r="2"></circle>
+                <circle cx="6.343" cy="6.344" r="2"></circle>
+                <circle cx="17.657" cy="17.658" r="2"></circle>
+            </svg>
+        </div>
+    </div>
+
+
+    <div id="post-content" class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 justify-evenly mb-32 gap-x-14">
+        {% for post in posts %}
+            <section class="mb-12 lg:mx-6 pt-6">
+                <div class="max-w-md mx-auto mt-4">
+                    <div class="mb-3">
+                        <a href="{% url 'article' post.user.username post.id post.slug %}">
+                            <img class="object-cover h-72 w-full rounded-none md:rounded-md" 
+                                src="{{ post.cover }}" 
+                                alt="cover image"
+                            />
+                        </a>
+                    </div>
+                    <div class="px-4 md:px-1">
+                        <h2 class="text-xl md:text-2xl font-semibold">
+                            <a href="{% url 'article' post.user.username post.id post.slug %}">
+                                {{ post.title }}
+                            </a>
+                        </h2>
+                        <a href="{% url 'article' post.user.username post.id post.slug %}">
+                            <div class="text-gray-800 py-4">
+                                {{ post.desc | truncatechars:150 | safe}}
+                            </div>
+                        </a>
+
+                        <div class="flex justify-between place-items-center">
+                            <div class="flex w-50 place-items-center">
+                                <div>
+                                    <img class="rounded-full h-12 w-12 md:h-14 md:w-14"
+                                        src="https://img-static-s3.s3.amazonaws.com/media/{{ profile.user.customuser.pic }}" 
+                                        alt="nature"
+                                    />
+                                </div>
+                                <div class="ml-4">
+                                    <h6 class="font-semibold -mb-1 md:mb-0 text-gray-800 hover:text-blue-700">
+                                            {{ post.user.first_name }}
+                                    </h6>
+                                    <p class="text-gray-700">{{ post.date }}</p>
+                                </div>
+                            </div>
+                            {% load check_bookmark %}
+                            <div>
+                                <a href="/bookmark/post/{{ post.id }}" class="bookmark_this">
+                                    {% if post|check_bookmark:user %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                             viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);">
+                                            <path d="M19,10.132v-1v-5c0-1.103-0.897-2-2-2H7c-1.103,0-2,0.897-2,2v5v1V22l7-4.666L19,22V10.132z"></path>
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                             viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);">
+                                            <path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path>
+                                        </svg>
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/iziToast.js' %}"></script>
+    <script src="https://unpkg.com/htmx.org@1.6.1" integrity="sha384-tvG/2mnCFmGQzYC1Oh3qxQ7CkQ9kMzYjWZSNtrRZygHPDDqottzEJsqS4oUVodhW" crossorigin="anonymous"></script>
+    <script src="{% static 'js/tabs.js' %}"></script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+          event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        })
+    </script>
+
+    {% if user.is_authenticated %}
+        <script>
+            $(".bookmark_this").click(function (e) {
+                e.preventDefault();
+                var getTag = $(this).children('svg')
+
+                $.ajax({
+                    type: "POST",
+                    url: this.href,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    dataType: "json"
+                }).done(function (data) {
+                    if (data.added) {
+                        addBookmark()
+                    } else {
+                        removeBookmark()
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+
+                function addBookmark() {
+                    getTag.html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);"><path d="M19,10.132v-1v-5c0-1.103-0.897-2-2-2H7c-1.103,0-2,0.897-2,2v5v1V22l7-4.666L19,22V10.132z"></path></svg>')
+                }
+
+                function removeBookmark() {
+                    getTag.html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);"><path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path></svg>')
+                }
+            });
+
+
+            $(".follow").click(function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: this.href,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    dataType: "json",
+                }).done(function (data) {
+                    if (data.success) {
+                        if (data.following) {
+                            var value = $("#followers").text();
+                            value = parseInt(value)+1;
+                            $("#followers").html(value)
+                            
+                            $('#follow-btn').html('Following')
+                        } else {
+                            var value = $("#followers").text();
+                            value = parseInt(value)-1;
+                            $("#followers").html(value)
+
+                            $('#follow-btn').html('Follow')
+                            // $(".follow").next().html('Follow')
+                        }
+                    } else {
+                        iziToast.info({
+                            position: 'topRight',
+                            message: data.error,
+                        });
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+            });
+        </script>
+    {% else %}
+        <script>
+            $(".bookmark_this").click(function (e) {
+                e.preventDefault();
+
+                iziToast.info({
+                    position: 'topRight',
+                    message: 'Please login or create an account to bookmark post.'
+                })
+            });
+            
+            $(".follow").click(function (e) {
+                e.preventDefault();
+                
+                iziToast.info({
+                    position: 'topRight',
+                    message: 'Please login or create an account to follow.'
+                })
+            });
+        </script>
+    {% endif %}
+{% endblock javascript %}

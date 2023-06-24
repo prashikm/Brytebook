@@ -1,0 +1,284 @@
+{% extends 'layouts/dashboardLayout.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user.first_name }}{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/filepond/filepond.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/filepond/filepond-plugin-image-preview.css' %}">
+{% endblock head %}
+
+{% block body %}
+    <section>
+        <div class="max-w-4xl flex flex-col place-items-center md:flex-row mx-auto md:place-items-stretch">
+            <div class="mt-10 w-32 mr-4 text-center">
+                <img id="pic"  class="rounded-full h-auto w-36 mb-4" 
+                    src="https://img-static-s3.s3.amazonaws.com/media/{{ profile.user.customuser.pic }}"
+                    alt="nature"
+                >
+                    <p id="uploadPic" class="w-36 hidden">
+                        <input 
+                            type="file" 
+                            class="filepond" 
+                            name="profilePic" 
+                            id="profilePic" 
+                            data-allow-reorder="false"
+                            data-max-file-size="3MB"
+                            data-max-files="1"
+                        >
+                    </p>
+                <span class="text-blue-600 font-semibold text-sm cursor-pointer" id="changePic">Change your avatar</span>
+                <span class="text-blue-600 font-semibold text-sm hidden cursor-pointer" id="seePic">View current avatar</span>
+            </div>
+
+            <div class="mb-14">
+                <form class="my-10 px-4" action="{% url 'edit_profile' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <div class="border border-gray-200 p-4">
+                            <h4 class="text-2xl font-semibold pb-2">Your Name</h4>
+                            <p class="py-2">
+                                Please enter your full name, or your pen name you are comfortable with
+                            </p>
+                            <input 
+                                type="text"
+                                class="border border-gray-300 w-full md:w-96 py-2 px-2 outline-none rounded-md focus:ring-1 focus:ring-gray-300"
+                                name="name" 
+                                id="name" 
+                                value="{{ profile.user.first_name }}"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="border border-gray-200 p-4">
+                            <h4 class="text-2xl font-semibold pb-2">Your Username</h4>
+                            <p class="py-2">This is your URL namespace within Brytebook</p>
+                            <div class="flex place-items-center">
+                                <div class="p-2 bg-gray-100 rounded-md">
+                                    <p>brytebook.com/</p>
+                                </div>
+
+                                <div class="pl-3 w-full">
+                                    <input 
+                                        type="text"
+                                        class="border border-gray-300 w-full md:w-96 py-2 px-2 outline-none rounded-md focus:ring-1 focus:ring-gray-300"
+                                        name="username" 
+                                        id="username" 
+                                        value="{{ profile.user }}"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="border border-gray-200 p-4">
+                            <h4 class="text-2xl font-semibold pb-2">Your Bio</h4>
+                            <p class="py-2">Please enter your bio you want readers to see</p>
+                            <textarea name="bio" id="bio" cols="30" rows="5" maxlength="150"
+                                class="border border-gray-300 w-full py-2 px-2 outline-none rounded-md resize-none focus:ring-1 focus:ring-gray-300">{{ profile.bio }}</textarea>
+                            <div id="counter" class="pt-2 text-gray-500 text-right hidden"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="border border-gray-200 p-4">
+                            <h4 class="text-2xl font-semibold pb-2">Your Website</h4>
+                            <p class="py-2">Please enter your website or social you want readers to go</p>
+                            <input 
+                                type="text"
+                                class="border border-gray-300 w-full md:w-96 py-2 px-2 outline-none rounded-md focus:ring-1 focus:ring-gray-300"
+                                name="website" id="website"
+                                value="{% if profile.link %}{{ profile.link }}{% endif %}"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <button 
+                            type="submit"
+                            class="flex place-content-center place-items-center float-right bg-blue-500 hover:bg-blue-dark text-white font-bold py-2 px-4 rounded hover:bg-blue-800"
+                        >
+                            <svg id="profileSpinner" class="animate-spin h-6 w-6 mr-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #FDFCE5;"><path d="M12 22c5.421 0 10-4.579 10-10h-2c0 4.337-3.663 8-8 8s-8-3.663-8-8c0-4.336 3.663-8 8-8V2C6.579 2 2 6.58 2 12c0 5.421 4.579 10 10 10z"></path></svg> 
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/iziToast.js' %}"></script>
+    <script src="{% static 'js/validation.js' %}"></script>
+    <script src="{% static 'js/bio-counter.js' %}"></script>
+    <script src="{% static 'js/profile-preview.js' %}"></script>
+    <script>
+        $("form").submit(function () {
+            function ajax_call() {
+                var formData = {
+                    name: $("#name").val(),
+                    username: $("#username").val(),
+                    bio: $("#bio").val(),
+                    website: $("#website").val(),
+                    id: $("#id").val()
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '/account/profile/edit_profile',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    data: formData,
+                    dataType: 'json',
+                    encode: true,
+                }).done(function (data) {
+                    $("#profileSpinner").hide()
+                    if (!data.success) {
+                        if (data.username_error) {
+                            iziToast.error({
+                                position: 'topRight',
+                                title: 'Error',
+                                message: data.username_error
+                            })
+                        }
+                    } else {
+                        iziToast.success({
+                            position: 'topRight',
+                            title: 'Sucess',
+                            message: 'Changes saved'
+                        })
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+            }
+
+            const name = $("#name").val().trim();
+            let validateName = nameValidation(name);
+            if (validateName !== true) {
+                iziToast.error({
+                    position: 'topRight',
+                    title: 'Error',
+                    message: validateName
+                })
+            }
+
+            const username = $("#username").val().trim();
+            let validateUsername = usernameValidation(username);
+            if (validateUsername !== true) {
+                iziToast.error({
+                    position: 'topRight',
+                    title: 'Error',
+                    message: validateUsername
+                })
+            }
+
+            const bio = $("#bio").val().trim();
+            let validateBio = bioValidation(bio);
+            if (validateBio !== true) {
+                iziToast.error({
+                    position: 'topRight',
+                    title: 'Error',
+                    message: validateBio
+                })
+                setAlert('small:last', )
+            }
+
+            var website = $("#website").val().trim();
+
+            if (validateName === true && validateBio === true && validateUsername == true) {
+                $("#profileSpinner").show()
+                ajax_call()
+            }
+
+            event.preventDefault();
+        });
+    </script>
+
+    <script src="{% static 'js/filepond/filepond.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-image-crop.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-file-validate-type.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-image-preview.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-image-exif-orientation.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-file-validate-size.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-file-poster.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-image-resize.js' %}"></script>
+    <script src="{% static 'js/filepond/filepond-plugin-image-transform.js' %}"></script>
+    <script>
+        FilePond.registerPlugin(
+            FilePondPluginImageResize,
+            FilePondPluginImageTransform,
+            FilePondPluginImagePreview,
+            FilePondPluginImageExifOrientation,
+            FilePondPluginFileValidateSize,
+            FilePondPluginFileValidateType,
+            FilePondPluginImageCrop,
+        );
+
+        FilePond.create(
+            document.querySelector('#profilePic'), {
+                allowFileSizeValidation: true,
+                acceptedFileTypes: ['image/png', 'image/jpeg', 'image/jpg'],
+                maxFileSize: '3MB',
+                labelMaxTotalFileSizeExceeded: 'Maximum file size is 3MB',
+                labelIdle: `Upload your profile picture <span class="filepond--label-action">Browse</span>`,
+                imagePreviewHeight: 170,
+                imageCropAspectRatio: '1:1',
+                imageResizeTargetWidth: 200,
+                imageResizeTargetHeight: 200,
+                stylePanelLayout: 'compact circle',
+                styleLoadIndicatorPosition: 'center bottom',
+                styleProgressIndicatorPosition: 'right bottom',
+                styleButtonRemoveItemPosition: 'left bottom',
+                styleButtonProcessItemPosition: 'right bottom',
+            }
+        );
+
+        FilePond.setOptions({
+            server: {
+                url: 'https://brytebook.com',
+                process: {
+                    url: '/account/profile/pic/upload',
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    onload: (response) => {
+                        var resp = JSON.parse(response)
+
+                        if (resp.success) {
+                            $("#pic").attr("src", resp.imgURL);
+                            $("#user-profile").attr("src", resp.imgURL);
+                        } else {
+                            iziToast.error({
+                                position: 'topRight',
+                                title: 'Error',
+                                message: 'Not valid image type.'
+                            })
+                        }
+                    },
+                    onerror: (error) => {
+                        iziToast.error({
+                            position: 'topRight',
+                            message: 'Something went wrong please try again.'
+                        })
+                    }
+                },
+                revert: {
+                    url: '/account/profile/pic/delete',
+                    enctype: 'multipart/form-data',
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    ondata: (formData) => {
+                        return formData
+                    },
+                }
+            },
+        });
+    </script>
+{% endblock script %}

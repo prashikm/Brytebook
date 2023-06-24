@@ -1,0 +1,389 @@
+{% extends 'layouts/loggedInLayout.html' %}
+{% load static %}
+{% load check_bookmark %}
+
+{% block head %}
+    <title>{{ post.title }}</title>
+    <meta name="title" content="{{ post.user.first_name }} - Brytebook">
+    <meta name="description" content="{{ profile.bio }}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{{ post.user.first_name }} - Brytebook">
+    <meta property="og:description" content="{{ profile.bio }}">
+    <meta property="og:image" content="https://img-static-s3.s3.amazonaws.com/media/{{ post.cover }}">
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="{{ post.user.first_name }} - Brytebook">
+    <meta property="twitter:description" content="{{ profile.bio }}">
+
+    <link rel="stylesheet" href="{% static 'styles/tailwind-typography.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/post-structure.css' %}">
+{% endblock head %}
+
+{% block body %}
+    <section class="mt-16">
+        <div class="max-w-3xl mx-auto">
+            <div>
+                <h2 class="text-2xl text-gray-800 md:text-4xl mb-2 font-semibold px-4 md:px-0">
+                    {{ post.title }}
+                </h2>
+
+                <div class="pl-4 py-6 flex flex-col-reverse md:items-center md:flex-row md:place-content-between mb-4">
+                    <div class="flex items-center">
+                        <div>
+                            <img class="rounded-full w-12" 
+                                src="https://img-static-s3.s3.amazonaws.com/media/{{ post.user.customuser.pic }}"
+                                alt="{{ post.user.first_name }}" 
+                            >
+                        </div>
+
+                        <div class="ml-4">
+                            <p class="text-gray-600 uppercase text-xs py-0.5">Written by</p>
+                            <h2 class="font-semibold text-gray-800 hover:text-blue-700">
+                                <a href="{% url 'profile' post.user.username %}">
+                                    {{ post.user.first_name }}
+                                </a>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-1 place-items-center mb-6 md:mb-0">
+                        <a 
+                            href="https://twitter.com/share?url={{ request.build_absolute_uri }}&text={{ share_string }}" target="_blank" 
+                            rel="noopener"
+                        >
+                            <img 
+                                class="bg-black w-8 p-2 rounded-full" 
+                                src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGlkPSJvcmlnaW5hbC1pY29uIiBmaWxsPSIjZmZmZmZmIj48cGF0aCBkPSJNMTYwLjUzMzMzLDM5Ljc3MjEzYy01LjQ4NjgsMi40MzY2NyAtMTEuMzgwNjcsNC4wNzY0IC0xNy41NjY5Myw0LjgxNmM2LjMxODEzLC0zLjc4NCAxMS4xNjI4LC05Ljc3NTMzIDEzLjQ0NDY3LC0xNi45MTkwN2MtNS45MDUzMywzLjUwMzA3IC0xMi40NTI4LDYuMDQ4NjcgLTE5LjQyNDUzLDcuNDI0NjdjLTUuNTc4NTMsLTUuOTQ1NDcgLTEzLjUyNDkzLC05LjY2MDY3IC0yMi4zMTk4NywtOS42NjA2N2MtMTYuODkwNCwwIC0zMC41ODE2LDEzLjY5NjkzIC0zMC41ODE2LDMwLjU4MTZjMCwyLjM5NjUzIDAuMjc1Miw0LjczNTczIDAuNzkxMiw2Ljk2NmMtMjUuNDE1ODcsLTEuMjcyOCAtNDcuOTQ3ODcsLTEzLjQ1MDQgLTYzLjAzOCwtMzEuOTU3NmMtMi42MjU4Nyw0LjUxNzg3IC00LjEzMzczLDkuNzY5NiAtNC4xMzM3MywxNS4zODI1M2MwLDEwLjYwNjY3IDUuMzk1MDcsMTkuOTY5MiAxMy41OTk0NywyNS40NTAyN2MtNS4wMTA5MywtMC4xNjA1MyAtOS43Mjk0NywtMS41MzY1MyAtMTMuODUxNzMsLTMuODI0MTNjMCwwLjEzMTg3IDAsMC4yNTIyNyAwLDAuMzg0MTNjMCwxNC44MjA2NyAxMC41Mzc4NywyNy4xODE3MyAyNC41MzI5MywyOS45ODUzM2MtMi41NjI4LDAuNjk5NDcgLTUuMjY4OTMsMS4wNzIxMyAtOC4wNjEwNywxLjA3MjEzYy0xLjk2NjUzLDAgLTMuODg3MiwtMC4xOTQ5MyAtNS43NTA1MywtMC41NDQ2N2MzLjg5MjkzLDEyLjE0ODkzIDE1LjE4NzYsMjAuOTk1NDcgMjguNTY5MiwyMS4yNDJjLTEwLjQ2MzMzLDguMjA0NCAtMjMuNjUsMTMuMDk0OTMgLTM3Ljk4MzMzLDEzLjA5NDkzYy0yLjQ2NTMzLDAgLTQuOTAyLC0wLjE0MzMzIC03LjI5ODUzLC0wLjQzYzEzLjUzNjQsOC42NzQ1MyAyOS42MDY5MywxMy43MzcwNyA0Ni44ODE0NywxMy43MzcwN2M1Ni4yNTU0NywwIDg3LjAwOTA3LC00Ni42MDA1MyA4Ny4wMDkwNywtODcuMDE0OGMwLC0xLjMyNDQgLTAuMDI4NjcsLTIuNjQzMDcgLTAuMDg2LC0zLjk1NmM1Ljk3OTg3LC00LjMxNzIgMTEuMTY4NTMsLTkuNzAwOCAxNS4yNjc4NywtMTUuODI5NzN6Ij48L3BhdGg+PC9nPjwvZz48L3N2Zz4=" alt="Twitter" 
+                            />
+                        </a>
+
+                        <a 
+                            href="https://www.facebook.com/sharer.php?u={{ request.build_absolute_uri }}" 
+                            target="_blank" 
+                            rel="noopener"
+                        >
+                            <img 
+                                class="bg-black w-8 p-2 rounded-full" 
+                                src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGZpbGw9IiNmZmZmZmYiPjxwYXRoIGQ9Ik0xMjUuNTk1ODMsNjQuNWgtMjUuMjYyNXYtMTQuMzMzMzNjMCwtNy4zOTYgMC42MDIsLTEyLjA1NDMzIDExLjIwMTUsLTEyLjA1NDMzaDEzLjM4NzMzdi0yMi43OWMtNi41MTQ1LC0wLjY3MzY3IC0xMy4wNjQ4MywtMS4wMDMzMyAtMTkuNjIyMzMsLTAuOTg5Yy0xOS40NDMxNywwIC0zMy42MzMxNywxMS44NzUxNyAtMzMuNjMzMTcsMzMuNjc2MTd2MTYuNDkwNWgtMjEuNXYyOC42NjY2N2wyMS41LC0wLjAwNzE3djY0LjUwNzE3aDI4LjY2NjY3di02NC41MjE1bDIxLjk3MywtMC4wMDcxN3oiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPg==" alt="Facebook" 
+                            />
+                        </a>
+
+                        <a 
+                            href="{{ request.build_absolute_uri }}" 
+                            class="copyLink"
+                        >
+                            <img class="bg-black w-8 p-2 rounded-full" 
+                                src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGZpbGw9IiNmZmZmZmYiPjxwYXRoIGQ9Ik0xMTYuOTA2MjUsMjEuNWMtOC45ODYzMywwIC0xNy41MTA3NCwzLjU0ODM0IC0yMy44NTE1Niw5LjkxMDE2bC03Ljg5NDUzLDcuODk0NTNjLTYuMzYxODIsNi4zNjE4MiAtOS45MTAxNiwxNC44NjUyMyAtOS45MTAxNiwyMy44NTE1NmMwLDQuMjYyMjEgMC44MTg4NSw4LjQxOTQzIDIuMzUxNTYsMTIuMjYxNzJsOC43MzQzOCwtOC43MzQzN2MtMS4wOTE4LC02Ljk3MDcgMS4wMjg4MSwtMTQuNDY2MzEgNi4zODI4MSwtMTkuODIwMzFsNy44OTQ1MywtNy44OTQ1M2M0LjMyNTIsLTQuMzI1MTkgMTAuMTgzMSwtNi43MTg3NSAxNi4yOTI5NywtNi43MTg3NWM2LjEwOTg2LDAgMTEuNzk5ODEsMi4zOTM1NiAxNi4xMjUsNi43MTg3NWM4LjkyMzM0LDguOTIzMzQgOC45MjMzNCwyMy40OTQ2MyAwLDMyLjQxNzk3bC03Ljg5NDUzLDcuODk0NTNjLTQuMzI1MTksNC4zMjUyIC0xMC4xODMxLDYuNzE4NzUgLTE2LjI5Mjk3LDYuNzE4NzVjLTEuMTk2NzgsMCAtMi4zNzI1NiwtMC4xMjU5NyAtMy41MjczNCwtMC4zMzU5NGwtOC43MzQzNyw4LjczNDM4YzMuODQyMjksMS41MzI3MSA3Ljk5OTUxLDIuMzUxNTYgMTIuMjYxNzIsMi4zNTE1NmM4Ljk4NjMzLDAgMTcuNTEwNzQsLTMuNTQ4MzQgMjMuODUxNTYsLTkuOTEwMTZsNy44OTQ1MywtNy44OTQ1M2M2LjM2MTgyLC02LjM2MTgyIDkuOTEwMTYsLTE0Ljg2NTIzIDkuOTEwMTYsLTIzLjg1MTU2YzAsLTguOTg2MzMgLTMuNTQ4MzQsLTE3LjMyMTc4IC05LjkxMDE2LC0yMy42ODM1OWMtNi4zNDA4MiwtNi4zNjE4MiAtMTQuNjk3MjcsLTkuOTEwMTYgLTIzLjY4MzU5LC05LjkxMDE2ek0xMDMuNjM2NzIsNjAuNjM2NzJsLTQzLDQzbDcuNzI2NTYsNy43MjY1Nmw0MywtNDN6TTYzLjE1NjI1LDc1LjI1Yy04Ljk4NjMzLDAgLTE3LjUxMDc0LDMuNTQ4MzQgLTIzLjg1MTU2LDkuOTEwMTZsLTcuODk0NTMsNy44OTQ1M2MtNi4zNjE4Miw2LjM2MTgyIC05LjkxMDE2LDE0Ljg2NTIzIC05LjkxMDE2LDIzLjg1MTU2YzAsOC45ODYzMyAzLjU0ODM0LDE3LjMyMTc4IDkuOTEwMTYsMjMuNjgzNTljNi4zNDA4Miw2LjM2MTgyIDE0LjY5NzI3LDkuOTEwMTYgMjMuNjgzNTksOS45MTAxNmM4Ljk4NjMzLDAgMTcuNTEwNzQsLTMuNTQ4MzQgMjMuODUxNTYsLTkuOTEwMTZsNy44OTQ1MywtNy44OTQ1M2M2LjM2MTgyLC02LjM2MTgyIDkuOTEwMTYsLTE0Ljg2NTIzIDkuOTEwMTYsLTIzLjg1MTU2YzAsLTQuMjYyMjEgLTAuODE4ODUsLTguNDE5NDMgLTIuMzUxNTYsLTEyLjI2MTcybC04LjczNDM3LDguNzM0MzhjMS4wOTE4LDYuOTcwNyAtMS4wMjg4MSwxNC40NjYzMSAtNi4zODI4MSwxOS44MjAzMWwtNy44OTQ1Myw3Ljg5NDUzYy00LjMyNTE5LDQuMzI1MiAtMTAuMTgzMSw2LjcxODc1IC0xNi4yOTI5Nyw2LjcxODc1Yy02LjEwOTg2LDAgLTExLjc5OTgsLTIuMzkzNTUgLTE2LjEyNSwtNi43MTg3NWMtOC45MjMzNCwtOC45MjMzNCAtOC45MjMzNCwtMjMuNDk0NjMgMCwtMzIuNDE3OTdsNy44OTQ1MywtNy44OTQ1M2M0LjMyNTIsLTQuMzI1MTkgMTAuMTgzMSwtNi43MTg3NSAxNi4yOTI5NywtNi43MTg3NWMxLjE5Njc4LDAgMi4zNzI1NiwwLjEyNTk4IDMuNTI3MzQsMC4zMzU5NGw4LjczNDM4LC04LjczNDM3Yy0zLjg0MjI5LC0xLjUzMjcxIC03Ljk5OTUxLC0yLjM1MTU2IC0xMi4yNjE3MiwtMi4zNTE1NnoiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPg==" 
+                                alt="link" 
+                            />
+                        </a>
+
+                        <a href="/bookmark/post/{{ post.id }}" class="bookmark_this">
+                            {% if post|check_bookmark:user %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-8" viewBox="0 0 24 24"
+                                         style="fill:rgba(0, 0, 0, 1);">
+                                    <path d="M19,10.132v-1v-5c0-1.103-0.897-2-2-2H7c-1.103,0-2,0.897-2,2v5v1V22l7-4.666L19,22V10.132z"></path>
+                                </svg>
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-8" viewBox="0 0 24 24"
+                                         style="fill:rgba(0, 0, 0, 1);">
+                                    <path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path>
+                                </svg>
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+                <img class="post_cover object-cover h-96 w-full md:rounded-md" 
+                    src="{{ post.cover }}" 
+                    alt="cover_image"
+                >
+
+                <div class="p-6">
+                    <div id="content" class="prose prose-lg prose-blue w-full" >
+                        {{ post.desc | safe }}
+                    </div>
+
+                    <div class="flex flex-col items-start px-4 mr-4 mt-4 py-6 md:flex-row md:place-content-between md:place-items-center sm:px-0">
+                        <div>
+                            <a href="/curate/{{ post.id }}" class="curate_this px-8 py-2 md:px-10 md:py-2.5 my-2 text-white font-semibold bg-gray-800 rounded-lg duration-700 ease-in-out focus:shadow-outline hover:bg-gray-900 flex items-center md:my-0">
+                                {% if is_curated %}
+                                    <div>
+                                        <img class="w-6 h-6 mr-4" src="https://img.icons8.com/fluency/48/000000/star.png"/>
+                                    </div>
+                                    <div>Curated</div>
+                                {% else %}
+                                    <div>
+                                        <img class="w-6 h-6 mr-4" src="https://img.icons8.com/color/48/000000/star--v1.png"/>
+                                    </div>
+                                    <div>Curate this post</div>
+                                {% endif %}
+                            </a>
+                        </div>
+
+                        <div class="flex space-x-1 place-items-center my-6 md:my-0">
+                            <a href="https://twitter.com/share?url={{ request.build_absolute_uri }}&text={{ share_string }}" target="_blank" rel="noopener">
+                                <img class="bg-black w-8 p-2 rounded-full" 
+                                    src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGlkPSJvcmlnaW5hbC1pY29uIiBmaWxsPSIjZmZmZmZmIj48cGF0aCBkPSJNMTYwLjUzMzMzLDM5Ljc3MjEzYy01LjQ4NjgsMi40MzY2NyAtMTEuMzgwNjcsNC4wNzY0IC0xNy41NjY5Myw0LjgxNmM2LjMxODEzLC0zLjc4NCAxMS4xNjI4LC05Ljc3NTMzIDEzLjQ0NDY3LC0xNi45MTkwN2MtNS45MDUzMywzLjUwMzA3IC0xMi40NTI4LDYuMDQ4NjcgLTE5LjQyNDUzLDcuNDI0NjdjLTUuNTc4NTMsLTUuOTQ1NDcgLTEzLjUyNDkzLC05LjY2MDY3IC0yMi4zMTk4NywtOS42NjA2N2MtMTYuODkwNCwwIC0zMC41ODE2LDEzLjY5NjkzIC0zMC41ODE2LDMwLjU4MTZjMCwyLjM5NjUzIDAuMjc1Miw0LjczNTczIDAuNzkxMiw2Ljk2NmMtMjUuNDE1ODcsLTEuMjcyOCAtNDcuOTQ3ODcsLTEzLjQ1MDQgLTYzLjAzOCwtMzEuOTU3NmMtMi42MjU4Nyw0LjUxNzg3IC00LjEzMzczLDkuNzY5NiAtNC4xMzM3MywxNS4zODI1M2MwLDEwLjYwNjY3IDUuMzk1MDcsMTkuOTY5MiAxMy41OTk0NywyNS40NTAyN2MtNS4wMTA5MywtMC4xNjA1MyAtOS43Mjk0NywtMS41MzY1MyAtMTMuODUxNzMsLTMuODI0MTNjMCwwLjEzMTg3IDAsMC4yNTIyNyAwLDAuMzg0MTNjMCwxNC44MjA2NyAxMC41Mzc4NywyNy4xODE3MyAyNC41MzI5MywyOS45ODUzM2MtMi41NjI4LDAuNjk5NDcgLTUuMjY4OTMsMS4wNzIxMyAtOC4wNjEwNywxLjA3MjEzYy0xLjk2NjUzLDAgLTMuODg3MiwtMC4xOTQ5MyAtNS43NTA1MywtMC41NDQ2N2MzLjg5MjkzLDEyLjE0ODkzIDE1LjE4NzYsMjAuOTk1NDcgMjguNTY5MiwyMS4yNDJjLTEwLjQ2MzMzLDguMjA0NCAtMjMuNjUsMTMuMDk0OTMgLTM3Ljk4MzMzLDEzLjA5NDkzYy0yLjQ2NTMzLDAgLTQuOTAyLC0wLjE0MzMzIC03LjI5ODUzLC0wLjQzYzEzLjUzNjQsOC42NzQ1MyAyOS42MDY5MywxMy43MzcwNyA0Ni44ODE0NywxMy43MzcwN2M1Ni4yNTU0NywwIDg3LjAwOTA3LC00Ni42MDA1MyA4Ny4wMDkwNywtODcuMDE0OGMwLC0xLjMyNDQgLTAuMDI4NjcsLTIuNjQzMDcgLTAuMDg2LC0zLjk1NmM1Ljk3OTg3LC00LjMxNzIgMTEuMTY4NTMsLTkuNzAwOCAxNS4yNjc4NywtMTUuODI5NzN6Ij48L3BhdGg+PC9nPjwvZz48L3N2Zz4=" 
+                                    alt="Twitter" 
+                                />
+                            </a>
+                            <a href="https://www.facebook.com/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" rel="noopener">
+                                <img class="bg-black w-8 p-2 rounded-full" 
+                                    src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGZpbGw9IiNmZmZmZmYiPjxwYXRoIGQ9Ik0xMjUuNTk1ODMsNjQuNWgtMjUuMjYyNXYtMTQuMzMzMzNjMCwtNy4zOTYgMC42MDIsLTEyLjA1NDMzIDExLjIwMTUsLTEyLjA1NDMzaDEzLjM4NzMzdi0yMi43OWMtNi41MTQ1LC0wLjY3MzY3IC0xMy4wNjQ4MywtMS4wMDMzMyAtMTkuNjIyMzMsLTAuOTg5Yy0xOS40NDMxNywwIC0zMy42MzMxNywxMS44NzUxNyAtMzMuNjMzMTcsMzMuNjc2MTd2MTYuNDkwNWgtMjEuNXYyOC42NjY2N2wyMS41LC0wLjAwNzE3djY0LjUwNzE3aDI4LjY2NjY3di02NC41MjE1bDIxLjk3MywtMC4wMDcxN3oiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPg==" 
+                                    alt="Facebook" 
+                                />
+                            </a>
+                            <a href="{{ request.build_absolute_uri }}" class="copyLink">
+                                <img class="bg-black w-8 p-2 rounded-full" 
+                                    src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGZpbGw9IiNmZmZmZmYiPjxwYXRoIGQ9Ik0xMTYuOTA2MjUsMjEuNWMtOC45ODYzMywwIC0xNy41MTA3NCwzLjU0ODM0IC0yMy44NTE1Niw5LjkxMDE2bC03Ljg5NDUzLDcuODk0NTNjLTYuMzYxODIsNi4zNjE4MiAtOS45MTAxNiwxNC44NjUyMyAtOS45MTAxNiwyMy44NTE1NmMwLDQuMjYyMjEgMC44MTg4NSw4LjQxOTQzIDIuMzUxNTYsMTIuMjYxNzJsOC43MzQzOCwtOC43MzQzN2MtMS4wOTE4LC02Ljk3MDcgMS4wMjg4MSwtMTQuNDY2MzEgNi4zODI4MSwtMTkuODIwMzFsNy44OTQ1MywtNy44OTQ1M2M0LjMyNTIsLTQuMzI1MTkgMTAuMTgzMSwtNi43MTg3NSAxNi4yOTI5NywtNi43MTg3NWM2LjEwOTg2LDAgMTEuNzk5ODEsMi4zOTM1NiAxNi4xMjUsNi43MTg3NWM4LjkyMzM0LDguOTIzMzQgOC45MjMzNCwyMy40OTQ2MyAwLDMyLjQxNzk3bC03Ljg5NDUzLDcuODk0NTNjLTQuMzI1MTksNC4zMjUyIC0xMC4xODMxLDYuNzE4NzUgLTE2LjI5Mjk3LDYuNzE4NzVjLTEuMTk2NzgsMCAtMi4zNzI1NiwtMC4xMjU5NyAtMy41MjczNCwtMC4zMzU5NGwtOC43MzQzNyw4LjczNDM4YzMuODQyMjksMS41MzI3MSA3Ljk5OTUxLDIuMzUxNTYgMTIuMjYxNzIsMi4zNTE1NmM4Ljk4NjMzLDAgMTcuNTEwNzQsLTMuNTQ4MzQgMjMuODUxNTYsLTkuOTEwMTZsNy44OTQ1MywtNy44OTQ1M2M2LjM2MTgyLC02LjM2MTgyIDkuOTEwMTYsLTE0Ljg2NTIzIDkuOTEwMTYsLTIzLjg1MTU2YzAsLTguOTg2MzMgLTMuNTQ4MzQsLTE3LjMyMTc4IC05LjkxMDE2LC0yMy42ODM1OWMtNi4zNDA4MiwtNi4zNjE4MiAtMTQuNjk3MjcsLTkuOTEwMTYgLTIzLjY4MzU5LC05LjkxMDE2ek0xMDMuNjM2NzIsNjAuNjM2NzJsLTQzLDQzbDcuNzI2NTYsNy43MjY1Nmw0MywtNDN6TTYzLjE1NjI1LDc1LjI1Yy04Ljk4NjMzLDAgLTE3LjUxMDc0LDMuNTQ4MzQgLTIzLjg1MTU2LDkuOTEwMTZsLTcuODk0NTMsNy44OTQ1M2MtNi4zNjE4Miw2LjM2MTgyIC05LjkxMDE2LDE0Ljg2NTIzIC05LjkxMDE2LDIzLjg1MTU2YzAsOC45ODYzMyAzLjU0ODM0LDE3LjMyMTc4IDkuOTEwMTYsMjMuNjgzNTljNi4zNDA4Miw2LjM2MTgyIDE0LjY5NzI3LDkuOTEwMTYgMjMuNjgzNTksOS45MTAxNmM4Ljk4NjMzLDAgMTcuNTEwNzQsLTMuNTQ4MzQgMjMuODUxNTYsLTkuOTEwMTZsNy44OTQ1MywtNy44OTQ1M2M2LjM2MTgyLC02LjM2MTgyIDkuOTEwMTYsLTE0Ljg2NTIzIDkuOTEwMTYsLTIzLjg1MTU2YzAsLTQuMjYyMjEgLTAuODE4ODUsLTguNDE5NDMgLTIuMzUxNTYsLTEyLjI2MTcybC04LjczNDM3LDguNzM0MzhjMS4wOTE4LDYuOTcwNyAtMS4wMjg4MSwxNC40NjYzMSAtNi4zODI4MSwxOS44MjAzMWwtNy44OTQ1Myw3Ljg5NDUzYy00LjMyNTE5LDQuMzI1MiAtMTAuMTgzMSw2LjcxODc1IC0xNi4yOTI5Nyw2LjcxODc1Yy02LjEwOTg2LDAgLTExLjc5OTgsLTIuMzkzNTUgLTE2LjEyNSwtNi43MTg3NWMtOC45MjMzNCwtOC45MjMzNCAtOC45MjMzNCwtMjMuNDk0NjMgMCwtMzIuNDE3OTdsNy44OTQ1MywtNy44OTQ1M2M0LjMyNTIsLTQuMzI1MTkgMTAuMTgzMSwtNi43MTg3NSAxNi4yOTI5NywtNi43MTg3NWMxLjE5Njc4LDAgMi4zNzI1NiwwLjEyNTk4IDMuNTI3MzQsMC4zMzU5NGw4LjczNDM4LC04LjczNDM3Yy0zLjg0MjI5LC0xLjUzMjcxIC03Ljk5OTUxLC0yLjM1MTU2IC0xMi4yNjE3MiwtMi4zNTE1NnoiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPg==" 
+                                    alt="Link" 
+                                />
+                            </a>
+
+                            <a href="/bookmark/post/{{ post.id }}" class="bookmark_this">
+                                {% if post|check_bookmark:user %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8" viewBox="0 0 24 24"
+                                                style="fill:rgba(0, 0, 0, 1);">
+                                        <path d="M19,10.132v-1v-5c0-1.103-0.897-2-2-2H7c-1.103,0-2,0.897-2,2v5v1V22l7-4.666L19,22V10.132z"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8" viewBox="0 0 24 24"
+                                                style="fill:rgba(0, 0, 0, 1);">
+                                        <path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path>
+                                    </svg>
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col mt-6">
+                        <div class="py-6 flex flex-col sm:flex-row border-t-2 border-gray-200">
+                            <div class="flex items-center">
+                                <div>
+                                    <img class="rounded-full w-16" 
+                                        src="https://img-static-s3.s3.amazonaws.com/media/{{ post.user.customuser.pic }}"
+                                        alt="{{ post.user.first_name }}" 
+                                    >
+                                </div>
+
+                                <div class="ml-4 flex flex-col md:flex-row md:space-x-6 md:place-items-center">
+                                    <div class="pb-2">
+                                        <p class="text-gray-600 uppercase text-xs py-0.5">Written by</p>
+                                        <h2 class="text-lg font-semibold text-gray-800 hover:text-blue-700">
+                                            <a href="{% url 'profile' post.user.username %}">
+                                                {{ post.user.first_name }}
+                                            </a>
+                                        </h2>
+                                    </div>
+                                    <div class="md:px-6">
+                                    {% if user.get_username != post.user.username %}
+                                        <button class="bg-blue-500 px-6 py-1 text-white font-semibold rounded-md hover:bg-blue-600">
+                                            <a href="/account/follow/{{ post.user }}" id="follow">
+                                                {% if is_following %}
+                                                    Following
+                                                {% else %}
+                                                    Follow
+                                                {% endif %}
+                                            </a>
+                                        </button>
+                                    {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div lass="px-6 mb-2 text-center sm:text-left">
+                            <div class="mb-10">
+                                <p>{{ profile.bio }}</p>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6 mb-32">
+            <div class="max-w-3xl mx-auto ">
+            {% for post in user_posts %}
+                <section class="mt-10 sm:px-4">
+                    <a href="{% url 'article' post.user.username post.id post.slug %}">
+                        <div class="sm:flex sm:space-x-6 rounded-md">
+                        <div class="mb-4 sm:mb-0 sm:w-5/6">
+                            <img class="object-cover h-56 w-full sm:rounded-md" 
+                                src="{{ post.cover }}" alt="cover" 
+                            />
+                        </div>
+                        <div class="px-4 sm:px-0 sm:pt-1 pb-2">
+                            <div class="mb-2">
+                            <h4 class="font-semibold text-xl pb-4 sm:pb-2 pr-2">{{ post.title | truncatechars:92 }}</h4>
+                            <p>{{ post.desc | truncatechars:100 | safe }}</p>
+                            </div>
+                            <div class="py-2">
+                            <p class="font-semibold">{{ post.user.first_name }}</p>
+                            <small>{{ post.date }}</small>
+                            </div>
+                        </div>
+                        </div>
+                    </a>
+                </section>
+            {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/iziToast.js' %}"></script>
+    <script src="{% static 'js/copy-link.js' %}"></script>
+    {% if user.is_authenticated %}
+        <script>
+            $(".bookmark_this").click(function (e) {
+                e.preventDefault();
+                var get_tag = $('.bookmark_this').children('svg')
+
+                $.ajax({
+                    type: "POST",
+                    url: this.href,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    dataType: "json"
+                }).done(function (data) {
+                    if (data.added) {
+                        addBookmark()
+                    } else if (data.error) {
+                        iziToast.info({
+                            position: 'topRight',
+                            message: data.error,
+                        });
+                    } else {
+                        removeBookmark()
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+
+                function addBookmark() {
+                    get_tag.html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);"><path d="M19,10.132v-1v-5c0-1.103-0.897-2-2-2H7c-1.103,0-2,0.897-2,2v5v1V22l7-4.666L19,22V10.132z"></path></svg>')
+                }
+
+                function removeBookmark() {
+                    get_tag.html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);"><path d="M18,2H6C4.897,2,4,2.897,4,4v5.276V10v12l8-4.572L20,22V10V9.276V4C20,2.897,19.103,2,18,2z M18,18.553l-6-3.428l-6,3.428 V10V9.276V4h12v5.276V10V18.553z"></path></svg>')
+                    }
+                }
+            );
+
+            $("#follow").click(function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: this.href,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    dataType: "json",
+                }).done(function (data) {
+                    if (data.success) {
+                        if (data.following) {
+                            var value = $("#followers").text();
+                            value = parseInt(value)+1;
+                            $("#followers").html(value)
+                            $("#follow").html('Following')
+                        } else {
+                            var value = $("#followers").text();
+                            value = parseInt(value)-1;
+                            $("#followers").html(value)
+                            $("#follow").html('Follow')
+                        }
+                    } else {
+                        iziToast.info({
+                            position: 'topRight',
+                            message: data.error,
+                        });
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+            });
+
+            $(".curate_this").click(function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: this.href,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    dataType: "json"
+                }).done(function (data) {
+                    if (data.added) {
+                        addCurate()
+                    } else {
+                        removeCurate()
+                    }
+
+                    if (data.error) {
+                        iziToast.error({
+                            position: 'topRight',
+                            title: 'Error',
+                            message: data.error
+                        })
+                    }
+                }).fail(function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again!'
+                    })
+                })
+
+                var get_tag = $('.curate_this')
+
+                function addCurate() {
+                    get_tag.html('<div><img class="w-6 h-6 mr-4" src="https://img.icons8.com/fluency/48/000000/star.png"/></div><div>Curated</div>')
+                }
+                
+                function removeCurate() {
+                    get_tag.html('<div><img class="w-6 h-6 mr-4" src="https://img.icons8.com/color/48/000000/star--v1.png"/></div><div>Curate this post</div>')
+                }
+            });
+        </script>
+    {% else %}
+        <script>
+            $(".bookmark_this").click(function (e) {
+                e.preventDefault();
+
+                iziToast.info({
+                    position: 'topRight',
+                    message: 'Please login or create an account to bookmark post.'
+                })
+            });
+            
+            $("#follow").click(function (e) {
+                e.preventDefault();
+                
+                iziToast.info({
+                    position: 'topRight',
+                    message: 'Please login or create an account to follow.'
+                })
+            });
+
+            $(".curate_this").click(function (e) {
+                e.preventDefault();
+                
+                iziToast.info({
+                    position: 'topRight',
+                    message: 'Please login or create an account to curate.'
+                })
+            });
+        </script>
+    {% endif %}
+{% endblock javascript %}

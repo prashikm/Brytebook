@@ -1,0 +1,59 @@
+{% extends 'layouts/home_layout.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="https://unpkg.com/@tailwindcss/typography@0.4.x/dist/typography.min.css" />
+    <title>Announcement | Brytebook</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <meta name="title" content="Brytebook Announcement | A Better Future for Online Writing Work">
+    <meta name="description" content="Share your ideas and build relationship">
+    <link rel="canonical" href="{% url 'announcement' %}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{% url 'announcement' %}">
+    <meta property="og:title" content="Brytebook Announcement | A Better Future for Online Writing Work">
+    <meta property="og:description" content="Share your ideas and build relationship">
+    <meta property="og:image" content="{% static 'images/landing_page.png' %}">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{% url 'announcement' %}">
+    <meta property="twitter:title" content="Brytebook Announcement | A Better Future for Online Writing Work">
+    <meta property="twitter:description" content="Share your ideas and build relationship">
+    <meta property="twitter:image" content="{% static 'images/landing_page.png' %}">
+{% endblock head %}
+
+{% block body %}
+        <div class="max-w-2xl mx-auto my-10 mb-24 px-6 md:px-0 prose prose-blue md:prose-xl">
+            <h1>A Better Future for Online Writing</h1>
+            <h2>Why we are building Brytebook</h2>
+            <hr>
+            <p>We've spent the better part of six months trying to find the best platform to build a blog around writing. It's been a long, rather frustrating journey. It&#39;s hard to find a simple and powerful platform that celebrates good writing. There were some problems that we were facing and we thought that needed to be addressed.</p>
+            <h2 id="-problem-">Problem</h2>
+            <h3 id="-simple-yet-powerful-platform-">Simple yet Powerful Platform</h3>
+            <p>It&#39;s hard to find a simple platform that is powerful and flexible. With platforms like WordPress, You can do a lot but as a side-effect of that, it&#39;s a bit bloated. It's packed with features that people who just want to put their writing on the internet don't need. It can be difficult for people who are not tech-savvy.</p>
+            <p>And then there is Medium which is pretty simple but again too restrictive. Here you are writing on someone else&#39;s terms and <a href="https://www.niemanlab.org/2019/03/the-long-complicated-and-extremely-frustrating-history-of-medium-2012-present/">they still don't have a profitable business model</a> so you can't know how long your writing is going to remain online.</p>
+            <p>There are also many other platforms like Ghost and Squarespace. Ghost is simpler than WordPress, but still a bit complicated. And too expensive. And Squarespace is more focused on building general websites and not so much on the writing part. Same with other website builders.</p>
+            <p>These platforms also don&#39;t provide a way to discover new and exciting writing.</p>
+            <h3 id="-discovery-of-blogs-">Discovery of Blogs</h3>
+            <p>Writers are not marketers. They are good at writing, not promoting. So, they find it difficult to grow their audience. Growing an audience is hard work and there is no proper solution that can help to discover new ideas and topics. Some writers today try to monetize by putting the content behind a paywall. But, it hinders the discovery of their posts to a large audience and prevents the conversion of new potential paid readers.</p>
+            <h3 id="-monetization-through-personal-relationships-and-community-">Monetization through Personal Relationships and Community</h3>
+            <p>Another problem is that there is no proper community that helps writers connect with their readers who are interested in their work.</p>
+            <p>Readers want a place where they can feel safe to have conversations, form relationships, and help one another towards a shared vision of the future. Community is spontaneous and emergent.</p>
+            <p>Having dedicated members who are willing to pay to join a community for great ideas, shared interest, and a simpler goal is more important than to paywall content. When you put content behind a paywall, there is a potential loss in spreading the word to a lot of readers. If the word is not spread to a lot of people, there would be fewer people who would actually subscribe and pay.</p>
+            <p>Here is our solution to the problems.</p>
+            <h2 id="-solution-brytebook-">Solution: Brytebook</h2>
+            <p>We are trying to build a platform that allows you to share your work and earn by building paid communities that people will actually care for. A simple publishing and reading experience with the flexibility and power. Where you're not tied to the platform and can download your content at any time. And where you own your audience.</p>
+            <p>It respects your privacy, doesn&#39;t try to get you addicted, and protects you from hate and harassment.</p>
+            <p>Brytebook lets you grow your readership with powerful discovery tools and provides a way to create communities that readers will want to join and pay for.</p>
+            <p>A platform made for users, not for advertisers.</p>
+            <p>Starting with its revenue model, Instead of making money off ads, Brytebook is user-funded, ensuring the focus is always on providing the best experience for our users.</p>
+            <p>With no ads, there&#39;s also no need for any tracking or selling of your data.</p>
+            <p>Brytebook does not work with algorithms, instead it works with people.</p>
+            <p>While we believe this should help prevent harassment, we also require each user to verify their identity before posting to Brytebook, deterring abuse, and making our network more about people and less about profiles.</p>
+            <p>These are just some of the things we&#39;ve planned for Brytebook. If you want to learn more about what we&#39;re building, have a voice in the development on the platform, and be the first one to get access when we open the gates, leave your <a href="mailto:brytebookhq@gmail.com">email here</a>.</p>
+            <h2 id="-current-status-">Current Status</h2>
+            <p>We are live! Now you can start publishing your writing.</p>
+            <p>If you have not joined our waiting list, yet, you can do so at <a href="/">brytebook.com</a></p>
+            <p>by <a href="https://twitter.com/SamyakR_">@SamyakR_</a> & <a href="https://twitter.com/prashikmk">@prashikmk</a></p>
+        </div>
+{% endblock body %}

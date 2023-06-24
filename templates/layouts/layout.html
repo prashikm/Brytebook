@@ -1,0 +1,37 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    {% block head %}{% endblock head %}
+    {% block css_style %}{% endblock css_style %}
+    {% include 'components/get_tailwind.html' %}
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+</head>
+
+<body>
+    <div>
+        {% include 'components/navbar.html' %}
+
+        {% block body %}{% endblock body %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="{% static 'js/iziToast.js' %}"></script>
+    {% if messages %}
+        <script>
+            {% for message in messages %}
+                iziToast.success({
+                    position: 'topRight',
+                    message: '{{ message }}',
+                });
+            {% endfor %}
+        </script>
+    {% endif %}
+    {% block javascript %}{% endblock javascript %}
+</body>
+</html>

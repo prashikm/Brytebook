@@ -1,0 +1,65 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {% block title %} {% endblock title %} | Brytebook</title>
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+    {% include 'components/get_tailwind.html' %}
+    <link rel="stylesheet" href="{% static 'styles/tailwind-typography.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/new-post.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/edit-post.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/iziToast.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/text-editor.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/cover-image.css' %}">
+    {% block head %}{% endblock head %}
+</head>
+<body>
+<section class="border-b mb-8">
+    <div class="max-w-full py-1 px-3 md:px-10">
+        <div class="flex justify-between place-items-center">
+            <div>
+                <p class="hidden sm:flex place-items-center">
+                    <span class="text-gray-600">Posts </span>
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 0.61);"><path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"></path></svg>
+                    </span>
+                    {% block post_status %}{% endblock post_status %}
+                </p>
+                <p class="block sm:hidden">
+                    <img class="h-8 w-auto md:hidden" src="{% static 'images/favicon.png' %}" alt="Brytebook">
+                </p>
+            </div>
+
+            <div class="flex place-items-center py-2">
+                <a href="/draft" id="draft" class="getContent">
+                    <button type="button" 
+                        id="draftBtn"
+                        class="mr-4 text-green-700 border-2 border-green-500 h-10 px-5 rounded-md hover:text-blue-700 font-semibold hover:border-blue-500"
+                    >Save to draft</button>
+                </a>
+
+                <a href="/publish" id="publish" class="getContent pr-4">
+                    <button type="button"
+                        id="publishBtn"
+                        class="h-10 px-5 text-gray-200 bg-gray-800 rounded-lg duration-700 ease-in-out focus:shadow-outline hover:bg-gray-900"
+                    >Publish</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block body %}
+{% endblock body %}
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
+<script src="{% static 'js/iziToast.js' %}"></script>
+<script src="{% static 'js/post-validation.js' %}"></script>
+{% block javascript %}{% endblock javascript %}
+</body>
+</html>

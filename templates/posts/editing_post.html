@@ -1,0 +1,374 @@
+{% extends 'posts/edit_post_layout.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block post_status %}
+    {% if post.published %}
+        <span id="status" class="text-gray-800">Published</span>
+    {% elif post.published == "False" %}
+        <span id="status" class="text-gray-800">Draft</span>
+    {% else %}
+        <span id="status" class="text-gray-800">Editing</span>
+    {% endif %}
+{% endblock post_status %}
+
+{% block body %}
+    <section class="mb-80">
+        <div class="max-w-8xl mx-auto">
+            <div class="px-4 md:px-10 mb-6 sm:mb-0">
+                <a href="{% url 'draft_post' %}">
+                    <img alt="profile-posts" class="w-8"
+                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAA1klEQVRoge3ZsQ6CMABF0bvyDa78hyMrq6urq6urq7/sQIiVFKQRW3l9J+neG5IXAmBmZmZmZmZWTF/6Ark0wAl4lL5IDg1wZoiVDz4AN16x0sEtcOc9Vjb4SDxWMrgnHioXHC6xfPB0iaWDY0ssGzy3xJLBS0ssF/xpiZdO98XJbu0S/+pklbLEMsHXjS6+i+DRJeGCEsFQ0WiFOnb2lLbQUlkwDK+WKS8gElIWXMqaBZdTzQeA0NKCy5pbcGmxBZc3XfBqjAtelWp+ppmZmZmZmdlfegJEcrvunhki9wAAAABJRU5ErkJggg=="
+                    />
+                </a>
+            </div>
+
+            <div class="w-full px-4 md:max-w-2xl mx-auto">
+                <div class="grow-wrap w-full text-4xl font-bold mb-6 text-gray-700 ml-4 md:ml-0">
+                    <textarea
+                        name="title"
+                        id="title"
+                        placeholder="Your title"
+                        class="outline-none"
+                        onInput="this.parentNode.dataset.replicatedValue = this.value"
+                    />{{ post.title }}</textarea>
+                </div>
+
+                <input type="number" name="id" id="id" value="{{ post.id }}" hidden />
+
+                <div class="img_contain relative w-full">
+                    <img src="{{ post.cover }}" alt="cover-image" 
+                        class="cover-size rounded-md object-cover h-72 w-full mt-6" 
+                        id="cover"
+                    >
+
+                    <div class="btn absolute z-10 bg-gray-100 rounded-full hidden">
+                        <button id="changeCover" class="border p-2 rounded-full">Change Image</button>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="absolute z-10 p-3 bottom-0 opacity-100 rounded-tr-md hidden" id="uploadSpinner">
+                        <svg class="animate-spin h-8 w-8 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            style="fill: rgb(128,128,128, 1);">
+                            <path
+                            d="M12 22c5.421 0 10-4.579 10-10h-2c0 4.337-3.663 8-8 8s-8-3.663-8-8c0-4.336 3.663-8 8-8V2C6.579 2 2 6.58 2 12c0 5.421 4.579 10 10 10z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="flex space-x-6 bg-gray-100 border border-gray-300 rounded-md py-3 mb-6 items-center justify-center mt-6 hidden" id="coverImage" style="position: relative;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);"><path d="M13 19v-4h3l-4-5-4 5h3v4z"></path><path d="M7 19h2v-2H7c-1.654 0-3-1.346-3-3 0-1.404 1.199-2.756 2.673-3.015l.581-.102.192-.558C8.149 8.274 9.895 7 12 7c2.757 0 5 2.243 5 5v1h1c1.103 0 2 .897 2 2s-.897 2-2 2h-3v2h3c2.206 0 4-1.794 4-4a4.01 4.01 0 0 0-3.056-3.888C18.507 7.67 15.56 5 12 5 9.244 5 6.85 6.611 5.757 9.15 3.609 9.792 2 11.82 2 14c0 2.757 2.243 5 5 5z"></path></svg>
+                    <span class="text-gray-600">Upload cover image (required)</span>
+                    <input 
+                        type="file" 
+                        name="coverImg" 
+                        id="coverImg"
+                        class="coverImageStyle"
+                        onchange="previewFile(this)"
+                        accept="image/png, image/gif, image/jpeg"
+                    />
+                </div>
+
+                <div class="ml-4 md:ml-0">
+                    <div name="text-editor" id="text-editor" class="prose lg:prose-lg prose-blue editor1 border-black mb-20">{{ post.desc | safe }}</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        class MyUploadAdapter {
+            constructor( loader ) {
+                this.loader = loader;
+            }
+
+            upload() {
+                return this.loader.file
+                    .then( file => new Promise( ( resolve, reject ) => {
+                        this._initRequest();
+                        this._initListeners( resolve, reject, file );
+                        this._sendRequest( file );
+                    } ) );
+            }
+
+            abort() {
+                if ( this.xhr ) {
+                    this.xhr.abort();
+                }
+            }
+
+            _initRequest() {
+                const xhr = this.xhr = new XMLHttpRequest();
+
+                xhr.open( 'POST', '/post/image/upload', true );
+                xhr.responseType = 'json';
+            }
+
+            _initListeners( resolve, reject, file ) {
+                const xhr = this.xhr;
+                const loader = this.loader;
+                const genericErrorText = `Couldn't upload file: ${ file.name }.`;
+
+                xhr.addEventListener( 'error', () => reject( genericErrorText ) );
+                xhr.addEventListener( 'abort', () => reject() );
+                xhr.addEventListener( 'load', () => {
+                    const response = xhr.response;
+
+                    if ( !response || response.error ) {
+                        return reject( response && response.error ? response.error.message : genericErrorText );
+                    }
+
+                    resolve( {
+                        default: response.url
+                    } );
+                } );
+
+                if ( xhr.upload ) {
+                    xhr.upload.addEventListener( 'progress', evt => {
+                        if ( evt.lengthComputable ) {
+                            loader.uploadTotal = evt.total;
+                            loader.uploaded = evt.loaded;
+                        }
+                    } );
+                }
+            }
+
+            _sendRequest( file ) {
+                const data = new FormData();
+                data.append( 'upload', file );
+                this.xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}')
+                this.xhr.send( data );
+            }
+        }
+
+        function MyCustomUploadAdapterPlugin( editor ) {
+            editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
+                return new MyUploadAdapter( loader );
+            };
+        }
+    </script>
+    <script>
+        $("#changeCover").click(function (e) {
+            e.preventDefault();
+            $(".img_contain").hide()
+            $("#coverImage").css('display', 'flex')
+        })  
+
+        var imgChanged = false;
+        var isImgUploaded = true;
+
+        function previewFile(input) {
+            var file = $("#coverImg").get(0).files[0];
+            var validateImage = $.inArray(file.name.split('.').pop().toLowerCase(), ['png','jpg','jpeg']) == -1
+            if (validateImage) {
+                alert('Invalid image format! Only png and jpeg image formats are allowed.');
+            } else if (file) {
+                try {
+                    var fileType = file.type;
+                } catch(error) {
+                    var fileType = '';
+                }
+
+                var reader = new FileReader();
+                reader.onload = function() {
+                    $("#cover").attr("src", reader.result);
+                    $(".img_contain").show()
+                    $("#coverImage").hide()
+
+                    var checkFileType = fileType == 'image/png' || fileType == 'image/jpeg'
+                    if (checkFileType) {
+                        isImgUploaded = false;
+
+                        $("#uploadSpinner").show()
+                        var formData = new FormData();
+                        formData.append('coverImg', file)
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/upload-cover',
+                            enctype: 'multipart/form-data',
+                            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            data: formData,
+                            dataType: 'json',
+                        }).done(function (data) {
+                            isImgUploaded = true;
+
+                            $("#uploadSpinner").hide()
+                            if (data.success) {
+                                imgChanged = true;
+                                $("#cover").attr("src", data.url);
+                            } else {
+                                iziToast.error({
+                                    position: 'topRight',
+                                    title: 'Error',
+                                    message: 'Something went wrong, please re-upload your image.'
+                                })
+                            }
+                        }).fail(function(xhr, status, error) {
+                            isImgUploaded = true;
+                            $("#uploadSpinner").hide()
+                            iziToast.error({
+                                position: 'topRight',
+                                title: 'Error',
+                                message: 'Something went wrong, please re-upload your image.'
+                            })
+                        })
+                    } else {
+                        iziToast.error({
+                            position: 'topRight',
+                            title: 'Error',
+                            message: 'Only png and jpeg image formats are allowed'
+                        })
+                    }
+                }
+                reader.readAsDataURL(file);
+                imgChanged = true;
+            } 
+        }
+    </script>
+    <script src="{% static 'js/init-editor.js' %}"></script>
+    <script>
+        $(".getContent").click(function(e) {
+            var contentID = this.id;
+
+            function draftPost(formData) {
+                $.ajax({
+                    type: "POST",
+                    url: '/draft_content',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                }).done(function (data) {
+                    $('#draftBtn').html('Save to draft')
+                    $('#draftBtn').prop('disabled', false);
+
+                    if (data.success) {
+                        saved = true;
+                        $("#status").html("Draft")
+                        iziToast.success({
+                            position: 'topRight',
+                            title: 'Success',
+                            message: 'Post saved in draft'
+                        })
+                    } else {
+                        iziToast.error({
+                            position: 'topRight',
+                            title: 'Error',
+                            message: 'Something went wrong, try again or refresh'
+                        })
+                    }
+                }).fail(function(xhr, status, error) {
+                    $('#draftBtn').html('Save to draft')
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again'
+                    })
+                })
+            };
+
+            function publishPost(formData) {
+                $.ajax({
+                    type: "POST",
+                    url: '/publish_content',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                }).done(function (data) {
+                    $('#publishBtn').html('Publish')
+                    $('#publishBtn').prop('disabled', false);
+
+                    if (data.success) {
+                        saved = true;
+                        $("#status").html("Updated")
+                        iziToast.success({
+                            position: 'topRight',
+                            title: 'Success',
+                            message: 'Post published'
+                        })
+                    } else {
+                        iziToast.error({
+                            position: 'topRight',
+                            title: 'Error',
+                            message: 'Something went wrong, try again or refresh'
+                        })
+                    }
+                }).fail(function(xhr, status, error) {
+                    $('#publishBtn').html('Publish')
+                    iziToast.error({
+                        position: 'topRight',
+                        title: 'Error',
+                        message: 'Something went wrong, please try again'
+                    })
+                })
+            };
+
+            const title = $("#title").val().trim();
+            let validateTitle = titleValidation(title);
+            if (validateTitle !== true) {
+                iziToast.error({
+                    position: 'topRight',
+                    title: 'Error',
+                    message: validateTitle
+                })
+            }
+
+            const content = editor.getData();
+            let validateContent = contentValidation(content);
+            if (validateContent !== true) {
+                iziToast.error({
+                    position: 'topRight',
+                    title: 'Error',
+                    message: validateContent
+                })
+            }
+
+            const checkValidations = validateTitle === true && validateContent === true
+            if (checkValidations) {
+                var formData = new FormData();
+                formData.append('id', $("#id").val())
+                formData.append('title', $("#title").val())
+                formData.append('content', editor.getData())
+
+                if (imgChanged)  {
+                    formData.append('img', true)
+                    formData.append('coverImg', $("#cover").attr('src'))
+                    imgChanged = false
+                } else{
+                    formData.append('img', false)
+                    formData.append('coverImg', 'NotChanged')
+                }
+
+                if (isImgUploaded) {
+                    if (contentID === 'draft') {
+                        $('#draftBtn').html('Saving to draft...')
+                        $('#draftBtn').prop('disabled', true);
+                        draftPost(formData);
+                    } else if (contentID == 'publish') {
+                        $('#publishBtn').html('Publishing...')
+                        $('#publishBtn').prop('disabled', true);
+                        publishPost(formData);
+                    }
+                } else {
+                    iziToast.info({
+                        position: 'topRight',
+                        title: 'Info',
+                        message: 'Please wait while your cover image is being uploaded and try again'
+                    })
+                }
+            }
+
+            e.preventDefault();
+        });
+    </script>
+{% endblock javascript %}

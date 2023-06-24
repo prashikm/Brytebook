@@ -1,0 +1,50 @@
+.prose ul > li::before {
+    display: none;
+}
+.prose ol > li::before {
+    display: none;
+}
+
+.cover-size{
+    height: 14rem;
+}
+
+@media (min-width: 640px) {
+    .cover-size{
+        height: 26rem;
+    }
+}
+
+#text-editor > figure > img {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#text-editor > hr {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.btn {
+    left: 50%;
+    margin-left: -50px;
+    top: 50%;
+    margin-top: -50px;
+}
+
+.img_contain:hover .btn {
+    display: block;
+}
+
+@media only screen and (max-width: 500px) {
+    .img_contain .btn {
+        display: block;
+    }
+
+    .btn {
+        left: 50%;
+        margin-left: -68px;
+        top: 62%;
+        margin-top: -50px;
+    }
+}

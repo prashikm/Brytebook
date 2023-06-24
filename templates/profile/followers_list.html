@@ -1,0 +1,68 @@
+{% extends 'layouts/loggedInLayout.html' %}
+
+{% block head %}
+  <title>Followers</title>
+{% endblock head %}
+
+{% block follow %}
+  <div class="px-4 py-4 max-w-md mx-auto">
+    <div class="flex place-items-center space-x-4 mb-6">
+      <div>
+        <img class="w-12 h-12 rounded-full" 
+          src="https://img-static-s3.s3.amazonaws.com/media/{{ list_user.customuser.pic }}" 
+          alt="{{ list_user.username }}"
+        >
+      </div>
+      <div>
+        <p class="font-semibold">
+          {{ list_user.first_name }}
+        </p>
+      </div>
+    </div>
+
+    <div class="flex space-x-4">
+      <a href="{% url 'followers_list' list_user %}">
+        <div class="transition duration-300 ease-in-out p-2">
+          <p class="text-md border-b border-black pb-2">Followers</p>
+        </div>
+      </a>
+      <a href="{% url 'following_list' list_user %}">
+        <div class="transition duration-300 ease-in-out text-gray-500 p-2 hover:text-black">
+          <p class="text-md pb-2">Following</p>
+        </div>
+      </a>
+    </div>
+  </div>
+{% endblock follow %}
+
+
+{% block body %}
+<section>
+  <div class="px-4 py-4 max-w-md mx-auto mt-6">
+    <ul>
+    {% for user in follower %}
+      <li>
+        <div class="flex place-items-center broder border-b border-gray-300 mt-4 pb-4">
+          <div class="mr-4">
+            <a href="/{{ user }}">
+              <img src="https://img-static-s3.s3.amazonaws.com/media/{{ user.user.customuser.pic }}" 
+                alt="{{ user.user.username }}" 
+                class="rounded-full w-16"
+              >
+            </a>
+          </div>
+          <div>
+            <p class="text-gray-900 font-semibold">
+              <a href="/{{ user }}" class="hover:text-blue-600">
+                @{{ user }}
+              </a>
+            <p>
+            <p class="text-gray-700">{{ user.user.first_name }}</p>
+          </div>
+        </div>
+      </li>
+    {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock body %}

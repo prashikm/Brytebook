@@ -1,0 +1,17 @@
+{% extends 'layouts/home_layout.html' %}
+
+{% block head %}
+    <title>Error Early Access | Brytebook</title>
+{% endblock head %}
+
+{% block body %}
+        <section class="max-w-2xl mx-auto">
+            <div class="text-center px-4 h-screen flex flex-col place-content-center">
+                <h2 class="text-2xl md:text-4xl font-bold text-red-600 mb-2 md:mb-4">Error!</h2>
+                <p class="text-red-500">
+                The provided email is not valid, please enter a valid email.
+                <a href="/" class="text-blue-700 hover:text-blue-900">Go back home.</a>
+                </p>
+            </div>
+        </section>
+{% endblock body %}

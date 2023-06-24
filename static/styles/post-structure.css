@@ -1,0 +1,30 @@
+.post_cover{
+    height: 13rem;
+}
+
+@media (min-width: 768px) {
+    .post_cover{
+        height: 30rem;
+    }
+}
+
+#content > figure > figcaption {
+    text-align: center;
+    margin-top: 0.6rem;
+}
+
+#content > figure.image {
+    display: table;
+    clear: both;
+    text-align: center;
+    margin: 1.8em auto;
+    min-width: 50px;
+}
+
+#content > figure > img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    min-width: 100%;
+    border-radius: 0.6rem;
+}

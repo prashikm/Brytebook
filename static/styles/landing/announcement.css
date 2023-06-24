@@ -1,0 +1,18 @@
+body{
+    line-height: 1.444;
+}
+
+p {
+    font-family: 'Inter', sans-serif;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+h1, h2, h3 {
+    font-family: 'DM Serif Display', serif;
+    margin: 1rem 0;
+}
+
+hr {
+    color: #00000085;
+}
